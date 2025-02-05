@@ -7,6 +7,9 @@
     "dev": "nodemon server.js",
     "build": "echo 'Skipping build step since this is a backend API'"
   },
+  "engines": {
+    "node": "20.x"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",

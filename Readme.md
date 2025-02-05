@@ -4,7 +4,7 @@
  > 🚨 **WARNING:** Unauthorized personnel attempting to access this repository will trigger an automatic self-destruct sequence.
  
  ## 🎯 **Mission Objectives**
- tHE assignment is to create an API using **Node.js, Express, and PostgreSQL**, with JWT-based authentication.
+ The assignment is to create an API using **Node.js, Express, and PostgreSQL**, with JWT-based authentication.
  
  - 🔹 **Manage classified gadgets**
  - 🔹 **Secure endpoint access**

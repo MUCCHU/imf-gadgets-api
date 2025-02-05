@@ -43,7 +43,58 @@ const getUniqueCodename = async () => {
   // If all predefined codenames are used, generate a random one
   return `Codename-${uuidv4().slice(0, 8)}`;
 };
-// GET: List all gadgets with a random mission success probability
+
+/**
+ * @swagger
+ * /gadgets:
+ *   get:
+ *     summary: Retrieve a list of all gadgets
+ *     description: Fetch all gadgets from the inventory. Optionally, filter by status. Each gadget includes a randomly generated mission success probability.
+ *     tags:
+ *       - Gadgets
+ *     security:
+ *       - BearerAuth: []  # Uses the global authorization from the "Authorize" button
+ *     parameters:
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [Available, Deployed, Destroyed, Decommissioned]
+ *         description: Filter gadgets by status.
+ *     responses:
+ *       200:
+ *         description: A list of gadgets with mission success probabilities.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: string
+ *                     format: uuid
+ *                     example: "1ccfa09b-6d39-441c-ac3a-5b449d623a48"
+ *                   name:
+ *                     type: string
+ *                     example: "Nightingale"
+ *                   status:
+ *                     type: string
+ *                     enum: [Available, Deployed, Destroyed, Decommissioned]
+ *                     example: "Available"
+ *                   missionSuccessProbability:
+ *                     type: string
+ *                     example: "87%"
+ *       400:
+ *         description: Invalid status filter.
+ *       401:
+ *         description: Unauthorized (Missing or Invalid Token).
+ *       500:
+ *         description: Internal server error.
+ */
+
+
+
 router.get('/', authenticateToken, async (req, res) => {
   try {
     const {status} = req.query;
@@ -60,7 +111,41 @@ router.get('/', authenticateToken, async (req, res) => {
   }
 });
 
-// POST: Add a new gadget
+/**
+ * @swagger
+ * /gadgets:
+ *   post:
+ *     summary: Add a new gadget to the inventory
+ *     description: Creates a new gadget with a unique, randomly generated codename. The gadget is initially marked as "Available".
+ *     tags:
+ *       - Gadgets
+ *     security:
+ *       - BearerAuth: []  # Uses JWT authentication
+ *     responses:
+ *       201:
+ *         description: Successfully created a new gadget.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: string
+ *                   format: uuid
+ *                   example: "1ccfa09b-6d39-441c-ac3a-5b449d623a48"
+ *                 name:
+ *                   type: string
+ *                   example: "The Kraken"
+ *                 status:
+ *                   type: string
+ *                   enum: [Available, Deployed, Destroyed, Decommissioned]
+ *                   example: "Available"
+ *       401:
+ *         description: Unauthorized (Missing or Invalid Token).
+ *       500:
+ *         description: Internal server error.
+ */
+
 router.post('/',authenticateToken, async (req, res) => {
   try {
     const codename = await getUniqueCodename();
@@ -75,7 +160,67 @@ router.post('/',authenticateToken, async (req, res) => {
   }
 });
 
-// PATCH: Update a gadget
+/**
+ * @swagger
+ * /gadgets/{id}:
+ *   patch:
+ *     summary: Update an existing gadget
+ *     description: Updates the details of a specific gadget. Decommissioned gadgets cannot be updated.
+ *     tags:
+ *       - Gadgets
+ *     security:
+ *       - BearerAuth: []  # Requires authentication
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Unique ID of the gadget to be updated.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: "Night Stalker"
+ *               status:
+ *                 type: string
+ *                 enum: [Available, Deployed, Destroyed, Decommissioned]
+ *                 example: "Deployed"
+ *     responses:
+ *       200:
+ *         description: Gadget successfully updated.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: string
+ *                   format: uuid
+ *                   example: "1ccfa09b-6d39-441c-ac3a-5b449d623a48"
+ *                 name:
+ *                   type: string
+ *                   example: "Night Stalker"
+ *                 status:
+ *                   type: string
+ *                   enum: [Available, Deployed, Destroyed, Decommissioned]
+ *                   example: "Deployed"
+ *       400:
+ *         description: Gadget is decommissioned and cannot be updated.
+ *       401:
+ *         description: Unauthorized (Missing or Invalid Token).
+ *       404:
+ *         description: Gadget not found.
+ *       500:
+ *         description: Internal server error.
+ */
+
 router.patch('/:id',authenticateToken, async (req, res) => {
   try {
     const gadget = await Gadget.findByPk(req.params.id);
@@ -88,7 +233,61 @@ router.patch('/:id',authenticateToken, async (req, res) => {
   }
 });
 
-// DELETE: Mark a gadget as decommissioned
+/**
+ * @swagger
+ * /gadgets/{id}:
+ *   delete:
+ *     summary: Decommission a gadget
+ *     description: Marks a gadget as "Decommissioned" instead of deleting it permanently.
+ *     tags:
+ *       - Gadgets
+ *     security:
+ *       - BearerAuth: []  # Requires authentication
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Unique ID of the gadget to be decommissioned.
+ *     responses:
+ *       200:
+ *         description: Gadget successfully decommissioned.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Gadget decommissioned"
+ *                 gadget:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                       format: uuid
+ *                       example: "1ccfa09b-6d39-441c-ac3a-5b449d623a48"
+ *                     name:
+ *                       type: string
+ *                       example: "Stealth Falcon"
+ *                     status:
+ *                       type: string
+ *                       enum: [Available, Deployed, Destroyed, Decommissioned]
+ *                       example: "Decommissioned"
+ *                     decommissionedAt:
+ *                       type: string
+ *                       format: date-time
+ *                       example: "2025-02-05T12:00:00.000Z"
+ *       401:
+ *         description: Unauthorized (Missing or Invalid Token).
+ *       404:
+ *         description: Gadget not found.
+ *       500:
+ *         description: Internal server error.
+ */
+
 router.delete('/:id',authenticateToken, async (req, res) => {
   try {
     const gadget = await Gadget.findByPk(req.params.id);
@@ -101,7 +300,46 @@ router.delete('/:id',authenticateToken, async (req, res) => {
   }
 });
 
-// POST: Self-destruct sequence
+/**
+ * @swagger
+ * /gadgets/{id}/self-destruct:
+ *   post:
+ *     summary: Trigger the self-destruct sequence for a gadget
+ *     description: Marks the gadget as "Destroyed" and returns a randomly generated confirmation code.
+ *     tags:
+ *       - Gadgets
+ *     security:
+ *       - BearerAuth: []  # Requires authentication
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Unique ID of the gadget to be self-destructed.
+ *     responses:
+ *       200:
+ *         description: Self-destruct sequence initiated.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Self-destruct sequence initiated"
+ *                 confirmationCode:
+ *                   type: integer
+ *                   example: 5678
+ *       401:
+ *         description: Unauthorized (Missing or Invalid Token).
+ *       404:
+ *         description: Gadget not found.
+ *       500:
+ *         description: Internal server error.
+ */
+
 router.post('/:id/self-destruct',authenticateToken, async (req, res) => {
   try {
     const gadget = await Gadget.findByPk(req.params.id);

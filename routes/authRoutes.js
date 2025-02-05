@@ -4,7 +4,49 @@ const { generateToken, hashPassword, comparePassword } = require("../utils/auth"
 
 const router = express.Router();
 
-// POST: Register a new user
+/**
+ * @swagger
+ * /auth/register:
+ *   post:
+ *     summary: Register a new user
+ *     description: Creates a new user with a hashed password.
+ *     tags:
+ *       - Authentication
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *                 example: "agent007"
+ *               password:
+ *                 type: string
+ *                 format: password
+ *                 example: "strongpassword123"
+ *     responses:
+ *       201:
+ *         description: User registered successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "User registered successfully"
+ *                 userId:
+ *                   type: string
+ *                   format: uuid
+ *                   example: "b3d1a582-8b6b-4d5e-b6cd-98d8ef456c44"
+ *       400:
+ *         description: Missing username or password.
+ *       500:
+ *         description: Internal server error.
+ */
+
 router.post("/register", async (req, res) => {
   try {
     const { username, password } = req.body;
@@ -29,7 +71,50 @@ router.post("/register", async (req, res) => {
   }
 });
 
-// POST: Login and get a token
+/**
+ * @swagger
+ * /auth/login:
+ *   post:
+ *     summary: User login
+ *     description: Authenticates a user and returns a JWT token upon successful login.
+ *     tags:
+ *       - Authentication
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *                 example: "agent007"
+ *               password:
+ *                 type: string
+ *                 format: password
+ *                 example: "strongpassword123"
+ *     responses:
+ *       200:
+ *         description: Login successful.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Login successful"
+ *                 token:
+ *                   type: string
+ *                   example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+ *       400:
+ *         description: Missing username or password.
+ *       401:
+ *         description: Invalid username or password.
+ *       500:
+ *         description: Internal server error.
+ */
+
 router.post("/login", async (req, res) => {
   try {
     const { username, password } = req.body;

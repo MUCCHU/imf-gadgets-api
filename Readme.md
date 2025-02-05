@@ -21,9 +21,11 @@
  ## 🌍 **Mission Deployment**
  The **IMF Gadget API** is successfully deployed on **Render** and is accessible at:
  
- 🔗 [IMF Gadget API](https://imf-gadgets-api.onrender.com/)
+ 🔗 [IMF Gadget API](https://imf-gadgets-api.onrender.com/api-docs)
  
  All database operations are securely handled in the **Render-hosted PostgreSQL database**.
+
+ When using swagger use the endpoints in authorize section to obtain a JWT token. Use this token to get access to other routes.
  
  ## 🕶️ **Mission Control: API Endpoints**
  
